@@ -119,7 +119,7 @@ fn main() -> io::Result<()> {
     let input_part1 = input.iter().map(Rps::game_from).collect();
     let score_part_1 = get_total_score(&input_part1);
     println!("The score according to your guide: {}", score_part_1);
-    
+
     let input_part2 = input.iter().map(Rps::game_from_part2).collect();
     let score_part_2 = get_total_score(&input_part2);
     println!("The score according to their guide: {}", score_part_2);
