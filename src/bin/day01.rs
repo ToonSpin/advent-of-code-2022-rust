@@ -19,7 +19,7 @@ fn main() -> io::Result<()> {
         input[0]
     );
     println!(
-        "The three elves carrying the most calories are carrying:{}",
+        "The three elves carrying the most calories are carrying: {}",
         input[0] + input[1] + input[2]
     );
 
