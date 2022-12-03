@@ -37,23 +37,17 @@ fn lines_to_vecs_p2(lines: &Vec<String>) -> Vec<Vec<String>> {
     lines.chunks(3).map(|slice| Vec::from(slice)).collect()
 }
 
+fn common_prio(v: &Vec<String>, f: fn(&Vec<String>) -> Vec<Vec<String>>) -> u64 {
+    f(&v).iter().map(common_char).map(prio).sum()
+}
+
 fn main() -> io::Result<()> {
     let lines = io::stdin().lock().lines().map(|r| r.unwrap()).collect();
 
-    let p1: u64 = lines_to_vecs_p1(&lines)
-        .iter()
-        .map(common_char)
-        .map(prio)
-        .sum();
-
+    let p1: u64 = common_prio(&lines, lines_to_vecs_p1);
     println!("The sum of priorities by rucksack: {}", p1);
 
-    let p2: u64 = lines_to_vecs_p2(&lines)
-        .iter()
-        .map(common_char)
-        .map(prio)
-        .sum();
-
+    let p2: u64 = common_prio(&lines, lines_to_vecs_p2);
     println!("The sum of priorities by Elf trio: {}", p2);
 
     Ok(())
