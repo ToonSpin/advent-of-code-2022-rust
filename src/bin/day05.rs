@@ -21,10 +21,10 @@ struct Move {
 
 impl Move {
     fn apply_p1(&self, mut stacks: Vec<Stack>) -> Vec<Stack> {
-        for _ in 0..self.quantity {
-            let c = stacks[self.from].pop().unwrap();
-            stacks[self.to].push(c);
-        }
+        let split_index = stacks[self.from].len() - (self.quantity as usize);
+        let tail = stacks[self.from].split_off(split_index);
+        let mut tail = tail.iter().rev().copied().collect();
+        stacks[self.to].append(&mut tail);
         stacks
     }
 
