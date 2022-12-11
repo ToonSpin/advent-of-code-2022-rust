@@ -11,13 +11,13 @@ use nom::IResult;
 
 type Item = u64;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 enum Operator {
     Add,
     Mul,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 enum Operand {
     Old,
     Scalar(Item),
@@ -30,7 +30,7 @@ fn operand_value(operand: &Operand, old: Item) -> Item {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 struct Operation {
     operator: Operator,
     operands: (Operand, Operand),
@@ -137,7 +137,7 @@ fn parse_monkey_false_line(input: &str) -> IResult<&str, usize> {
 }
 
 fn parse_monkey(input: &str) -> IResult<&str, Monkey> {
-    let (rest, (_, items, op, modulus, monkey_true, monkey_false)) = tuple((
+    let (rest, (_, mut items, op, modulus, monkey_true, monkey_false)) = tuple((
         parse_opening_line,
         parse_starting_items_line,
         parse_operation_line,
@@ -145,6 +145,7 @@ fn parse_monkey(input: &str) -> IResult<&str, Monkey> {
         parse_monkey_true_line,
         parse_monkey_false_line,
     ))(input)?;
+    items.reserve(2000);
     let monkey = Monkey {
         items,
         op,
@@ -160,10 +161,15 @@ fn parse_monkeys(input: &str) -> IResult<&str, Vec<Monkey>> {
     separated_list1(line_ending, parse_monkey)(input)
 }
 
-fn play_turn(monkeys: Vec<Monkey>, thrower: usize, modulus: Option<Item>) -> Vec<Monkey> {
-    let mut new_monkeys = monkeys.clone();
+fn play_turn(
+    mut monkeys: Vec<Monkey>,
+    thrower: usize,
+    modulus: Option<Item>,
+    buffer: &mut Vec<(usize, Item)>,
+) -> Vec<Monkey> {
     let m = &monkeys[thrower];
     let mut count = m.inspection_count;
+
     for item in m.items.iter() {
         let item = m.op.evaluate(*item);
         let item = if let Some(part2) = modulus {
@@ -176,25 +182,36 @@ fn play_turn(monkeys: Vec<Monkey>, thrower: usize, modulus: Option<Item>) -> Vec
         } else {
             m.monkey_false
         };
-        new_monkeys[catcher].items.push(item);
+        buffer.push((catcher, item));
         count += 1;
     }
-    new_monkeys[thrower].items = Vec::new();
-    new_monkeys[thrower].inspection_count = count;
-    new_monkeys
+
+    for (catcher, item) in buffer.iter() {
+        monkeys[*catcher].items.push(*item);
+    }
+    buffer.clear();
+
+    monkeys[thrower].items.clear();
+    monkeys[thrower].inspection_count = count;
+    monkeys
 }
 
-fn play_round(mut monkeys: Vec<Monkey>, modulus: Option<Item>) -> Vec<Monkey> {
+fn play_round(
+    mut monkeys: Vec<Monkey>,
+    modulus: Option<Item>,
+    buffer: &mut Vec<(usize, Item)>,
+) -> Vec<Monkey> {
     let l = monkeys.len();
     for i in 0..l {
-        monkeys = play_turn(monkeys, i, modulus);
+        monkeys = play_turn(monkeys, i, modulus, buffer);
     }
     monkeys
 }
 
 fn play_rounds(mut input: Vec<Monkey>, count: u64, modulus: Option<Item>) -> u64 {
+    let mut buffer = Vec::new();
     for _ in 0..count {
-        input = play_round(input, modulus);
+        input = play_round(input, modulus, &mut buffer);
     }
     let mut counts: Vec<u64> = input.iter().map(|m| m.inspection_count).collect();
     counts.sort();
