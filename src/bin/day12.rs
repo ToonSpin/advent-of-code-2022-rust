@@ -168,9 +168,9 @@ fn main() -> io::Result<()> {
     let map = HeightMap::new(input);
 
     let trip1 = map.find_shortest_path(map.end, map.begin, false).len() - 1;
-    println!("The shortest path from start to end: {}", trip1);
+    println!("Shortest path from start to end: {}", trip1);
 
     let trip2 = map.find_shortest_path(map.end, map.begin, true).len() - 1;
-    println!("The shortest path from any groundlevel cell to end: {}", trip2);
+    println!("Shortest path from any groundlevel cell to end: {}", trip2);
     Ok(())
 }
