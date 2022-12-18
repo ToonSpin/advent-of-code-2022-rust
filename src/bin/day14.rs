@@ -83,10 +83,6 @@ fn simulate_sand_part_one(material: &mut HashSet<Point>, max_y: u32) -> () {
                 x += 1;
                 continue;
             }
-            if material.contains(&(x, y - 1)) {
-                done = true;
-                break;
-            }
             material.insert((x, y - 1));
             break;
         }
