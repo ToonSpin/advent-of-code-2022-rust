@@ -158,8 +158,8 @@ fn main() -> io::Result<()> {
     let input = parse_voxels(&input[..]);
     let graph = VoxelGraph::from(input.clone());
 
-    println!("{:?}", graph.surface_area());
-    println!("{:?}", graph.outer_surface_area());
+    println!("The total surface area: {}", graph.surface_area());
+    println!("The inner surface area: {}", graph.outer_surface_area());
 
     Ok(())
 }
