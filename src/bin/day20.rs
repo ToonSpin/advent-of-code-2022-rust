@@ -31,40 +31,51 @@ impl CircularList {
         CircularList { list, zero_pos }
     }
 
+    fn yank(&mut self, index: usize) {
+        let item = self.list[index];
+        self.list[item.next].prev = item.prev;
+        self.list[item.prev].next = item.next;
+    }
+
+    fn insert_before(&mut self, index: usize, before: usize) {
+        let new_prev = self.list[before].prev;
+        let new_next = before;
+
+        self.list[before].prev = index;
+        self.list[new_prev].next = index;
+        self.list[index].next = new_next;
+        self.list[index].prev = new_prev;
+    }
+
+    fn insert_after(&mut self, index: usize, after: usize) {
+        let new_next = self.list[after].next;
+        let new_prev = after;
+
+        self.list[after].next = index;
+        self.list[new_next].prev = index;
+        self.list[index].next = new_next;
+        self.list[index].prev = new_prev;
+    }
+
     fn mix(mut self) -> Self {
-        for i in 0..self.list.len() {
-            let mut item = self.list[i];
-            let steps = (item.value.abs() as usize) % (self.list.len() - 1);
-            if item.value < 0 {
+        for index in 0..self.list.len() {
+            let value = self.list[index].value;
+            let steps = (value.abs() as usize) % (self.list.len() - 1);
+            if value > 0 {
+                let mut after = index;
                 for _ in 0..steps {
-                    self.list[item.next].prev = item.prev;
-                    self.list[item.prev].next = item.next;
-
-                    let new_prev = self.list[item.prev].prev;
-                    let new_next = item.prev;
-
-                    self.list[i].next = new_next;
-                    self.list[i].prev = new_prev;
-                    self.list[new_prev].next = i;
-                    self.list[new_next].prev = i;
-
-                    item = self.list[i];
+                    after = self.list[after].next;
                 }
-            } else {
+                self.yank(index);
+                self.insert_after(index, after);
+            }
+            if value < 0 {
+                let mut before = index;
                 for _ in 0..steps {
-                    self.list[item.prev].next = item.next;
-                    self.list[item.next].prev = item.prev;
-
-                    let new_next = self.list[item.next].next;
-                    let new_prev = item.next;
-
-                    self.list[i].prev = new_prev;
-                    self.list[i].next = new_next;
-                    self.list[new_next].prev = i;
-                    self.list[new_prev].next = i;
-
-                    item = self.list[i];
+                    before = self.list[before].prev;
                 }
+                self.yank(index);
+                self.insert_before(index, before);
             }
         }
         self
